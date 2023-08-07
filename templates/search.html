@@ -1,0 +1,27 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}Search Recipes{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Search for Recipes</h1>
+
+    <form action="/search" method="get">
+        <div class="mb-3">
+            <label for="searchTerm" class="form-label">Search by Name</label>
+            <input type="text" class="form-control" id="searchTerm" name="search_term">
+        </div>
+        <div class="mb-3">
+            <label for="ingredientFilter" class="form-label">Filter by Ingredient</label>
+            <input type="text" class="form-control" id="ingredientFilter" name="ingredient_filter">
+        </div>
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    <!-- Results section placeholder -->
+    <div class="mt-4">
+        <h2>Search Results:</h2>
+        <!-- This section will display search results dynamically later on -->
+    </div>
+</div>
+{% endblock %}

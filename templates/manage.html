@@ -1,0 +1,22 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}Manage Recipes{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Manage Recipes</h1>
+    <div class="row">
+        <!-- Example recipe entry with a delete button. This will be generated dynamically later on. -->
+        <div class="col-md-4">
+            <div class="card">
+                <img src="{{ url_for('static', filename='images/recipe_placeholder.jpg') }}" class="card-img-top" alt="Recipe Image">
+                <div class="card-body">
+                    <h5 class="card-title">Recipe Name</h5>
+                    <button type="button" class="btn btn-danger">Delete</button>
+                </div>
+            </div>
+        </div>
+        <!-- More recipe entries will be added here -->
+    </div>
+</div>
+{% endblock %}

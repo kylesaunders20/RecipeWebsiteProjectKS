@@ -1,0 +1,21 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}Recipe Gallery{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Recipe Gallery</h1>
+    {% for recipe in recipes %}
+    <div class="col-md-4">
+        <div class="card">
+            <img src="{{ url_for('static', filename=recipe.image_link) }}" class="card-img-top" alt="Recipe Image">
+            <div class="card-body">
+                <h5 class="card-title">{{ recipe.recipe_name }}</h5>
+                <p class="card-text">Main Ingredients: {{ recipe.ingredients.split(',')[0:3]|join(', ') }}</p>
+                <a href="#" class="btn btn-primary">View Recipe</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
