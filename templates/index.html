@@ -1,15 +1,87 @@
-{% extends "bootstrap/base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-{% block title %}Homepage{% endblock %}
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 
-{% block content %}
-<div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <h1>Welcome to our Recipe Web Application!</h1>
-            <p>Discover and share amazing recipes.</p>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Pacifico&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS (if you have a separate stylesheet) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <title>Recipe Website</title>
+</head>
+<body>
+
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="#">Recipe Site</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/gallery">Gallery</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/submit">Submit Recipe</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/manage">Manage Recipes</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/search">Search Recipe</a>
+                </li>
+                <!-- Add other navigation links as needed -->
+            </ul>
         </div>
     </div>
-    <!-- You can add more rows and columns as per your design -->
-</div>
+</nav>
+
+<!-- Main Content -->
+{% block content %}
+    <div class="jumbotron">
+      <h1 class="display-4">Welcome to Kyle's Recipe Site!</h1>
+      <p class="lead">Discover, Share, and Enjoy the best recipes from around the world.</p>
+      <hr class="my-4">
+      <p>Find your next favorite recipe or share your own!</p>
+      <a class="btn btn-primary btn-lg" href="/gallery" role="button">Browse Recipes</a>
+    </div>
+
+    <!-- Featured Recipes using Bootstrap Grid and Cards -->
+    <div class="container">
+      <h2>Featured Recipes</h2>
+      <div class="row">
+        <!-- Example Recipe Card -->
+        <div class="col-md-4">
+          <div class="card">
+            <img src="cake.jpg" class="card-img-top" alt="...">
+            <div class="card-body">
+              <h5 class="card-title">Chocolate Cake</h5>
+              <p class="card-text">Delicious chocolate cake!</p>
+              <a href="#" class="btn btn-primary">View Recipe</a>
+            </div>
+          </div>
+        </div>
+        <!-- Repeat for other recipes -->
+      </div>
+    </div>
 {% endblock %}
+
+<!-- Optional: Bootstrap JS, Popper.js, and jQuery -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>
