@@ -1,14 +1,31 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_bootstrap import Bootstrap
 import csv
 import os
 
+from werkzeug.utils import secure_filename
+
 app = Flask(__name__)
 Bootstrap(app)
 
+UPLOAD_FOLDER = os.path.join('static', 'images')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # Fetch all recipes
+    recipes = fetch_recipes()
+
+    for recipe in recipes:
+        ratings = [int(rating) for rating in recipe["user_ratings"].split(",") if rating]
+        recipe["average_rating"] = sum(ratings) / len(ratings) if ratings else "No ratings yet"
+
+    featured_recipes = recipes[:3]
+
+    return render_template('index.html', featured_recipes=featured_recipes)
+
 
 
 @app.route('/gallery')
@@ -24,18 +41,22 @@ def gallery():
 @app.route('/submit', methods=['GET', 'POST'])
 def submit():
     if request.method == 'POST':
-        # For now, we'll use a placeholder image link. Later, we'll handle actual image uploads.
-        recipe_data = {
-            "recipe_name": request.form.get("recipe_name"),
-            "image_link": "images/recipe_placeholder.jpg",
-            "ingredients": request.form.get("ingredients"),
-            "preparation": request.form.get("preparation"),
-            "serving": request.form.get("serving"),
-            "user_ratings": ""  # initially empty
-        }
-        save_recipe(recipe_data)
-        return redirect(url_for('gallery'))
+        file = request.files['file']
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            recipe_data = {
+                "recipe_name": request.form.get("recipe_name"),
+                "image_link": 'images/' + filename,  # Update the image link to point to the uploaded file
+                "ingredients": request.form.get("ingredients"),
+                "preparation": request.form.get("preparation"),
+                "serving": request.form.get("serving"),
+                "user_ratings": ""  # initially empty
+            }
+            save_recipe(recipe_data)
+            return redirect(url_for('gallery'))
     return render_template('submit.html')
+
 
 
 
@@ -48,10 +69,16 @@ def manage():
 
 @app.route('/search', methods=['GET'])
 def search():
-    search_term = request.args.get('search_term')
-    ingredient_filter = request.args.get('ingredient_filter')
+    search_term = request.args.get('search_term', '')
+    ingredient_filter = request.args.get('ingredient_filter', '')
     recipes = search_recipes(search_term, ingredient_filter)
+
+    for recipe in recipes:
+        ratings = [int(rating) for rating in recipe["user_ratings"].split(",") if rating]
+        recipe["average_rating"] = sum(ratings) / len(ratings) if ratings else "No ratings yet"
+
     return render_template('search.html', recipes=recipes, search_term=search_term, ingredient_filter=ingredient_filter)
+
 
 @app.route('/rate_recipe', methods=['POST'])
 def rate_recipe():
@@ -59,12 +86,21 @@ def rate_recipe():
     rating = request.form.get("rating")
     if recipe_name and rating:
         update_ratings(recipe_name, rating)
-    return redirect(url_for('gallery'))  # Redirect back to gallery after rating
+        ratings = get_ratings(recipe_name)
+        average_rating = round(sum(ratings) / len(ratings), 1) if ratings else "No ratings yet"
+        return jsonify(success=True, average_rating=average_rating)
+    return jsonify(success=False, message="Failed to rate the recipe.")
+
 
 
 @app.route('/delete_recipe/<recipe_name>', methods=['POST'])
 def delete_recipe(recipe_name):
     recipes = fetch_recipes()
+    image_link_to_delete = None
+    for recipe in recipes:
+        if recipe['recipe_name'] == recipe_name:
+            image_link_to_delete = recipe['image_link']
+            break
     recipes = [recipe for recipe in recipes if recipe['recipe_name'] != recipe_name]
 
     # Save the updated recipes back to the CSV
@@ -74,9 +110,26 @@ def delete_recipe(recipe_name):
         writer.writeheader()
         for recipe in recipes:
             writer.writerow(recipe)
+    if image_link_to_delete:
+        try:
+            os.remove(os.path.join("static", image_link_to_delete))
+        except OSError as e:
+            print(f"Error deleting {image_link_to_delete}: {e}")
 
     return redirect(url_for('manage'))
 
+@app.route('/recipe/<recipe_name>')
+def recipe_detail(recipe_name):
+    recipes = fetch_recipes()
+    for recipe in recipes:
+        if recipe["recipe_name"] == recipe_name:
+            return render_template('recipe_detail.html', recipe=recipe)
+    return "Recipe not found", 404
+
+
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def fetch_recipes():
     recipes = []
@@ -106,6 +159,7 @@ def search_recipes(search_term=None, ingredient_filter=None):
     return filtered_recipes
 
 
+
 def get_ratings(recipe_name):
     recipes = fetch_recipes()
     for recipe in recipes:
@@ -117,7 +171,6 @@ def get_ratings(recipe_name):
 def update_ratings(recipe_name, new_rating):
     recipes = fetch_recipes()
     updated = False
-
     # Find the recipe and update its ratings
     for recipe in recipes:
         if recipe["recipe_name"] == recipe_name:
@@ -125,6 +178,7 @@ def update_ratings(recipe_name, new_rating):
             current_ratings.append(str(new_rating))
             recipe["user_ratings"] = ",".join(current_ratings)
             updated = True
+            print(f"Updated ratings for {recipe_name}: {recipe['user_ratings']}")
             break
 
     # If we updated the ratings, save back to the CSV
@@ -134,6 +188,12 @@ def update_ratings(recipe_name, new_rating):
             writer.writeheader()
             for recipe in recipes:
                 writer.writerow(recipe)
+
+        # Print the recipes after the update
+        print(f"Recipes after update: {recipes}")
+    else:
+        print(f"Recipe {recipe_name} not found in the list. No updates made.")
+
 
 
 

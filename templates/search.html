@@ -1,4 +1,4 @@
-{% extends "bootstrap/base.html" %}
+{% extends "index.html" %}
 
 {% block title %}Search Recipes{% endblock %}
 
@@ -8,12 +8,12 @@
 
     <form action="/search" method="get">
         <div class="mb-3">
-            <label for="searchTerm" class="form-label">Search by Name</label>
-            <input type="text" class="form-control" id="searchTerm" name="search_term">
+            <label for="searchTerm" class="form-label recipe-card-text">Search by Name</label>
+            <input type="text" class="form-control" id="searchTerm" name="search_term" value="{{ search_term }}">
         </div>
         <div class="mb-3">
-            <label for="ingredientFilter" class="form-label">Filter by Ingredient</label>
-            <input type="text" class="form-control" id="ingredientFilter" name="ingredient_filter">
+            <label for="ingredientFilter" class="form-label recipe-card-text">Filter by Ingredient</label>
+            <input type="text" class="form-control" id="ingredientFilter" name="ingredient_filter" value="{{ ingredient_filter }}">
         </div>
         <button type="submit" class="btn btn-primary">Search</button>
     </form>
@@ -22,18 +22,36 @@
     <div class="mt-4">
     <h2>Search Results:</h2>
     <div class="row">
-        {% for recipe in recipes %}
-            <div class="col-md-4">
-                <div class="card">
-                    <img src="{{ url_for('static', filename=recipe.image_link) }}" class="card-img-top" alt="Recipe Image">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ recipe.recipe_name }}</h5>
-                        <p class="card-text">Main Ingredients: {{ recipe.ingredients.split(',')[0:3]|join(', ') }}</p>
-                        <a href="#" class="btn btn-primary">View Recipe</a>
+        {% if recipes|length > 0 %}
+            {% for recipe in recipes %}
+                <div class="col-md-4">
+                    <div class="card">
+                        <img src="{{ url_for('static', filename=recipe.image_link) }}" class="card-img-top" alt="Recipe Image">
+                        <div class="card-body">
+                            <h5 class="card-title recipe-card-text">{{ recipe.recipe_name }}</h5>
+                            <p class="card-text recipe-card-text">Ingredients: {{ ", ".join(recipe.ingredients.split(",")[:3]) }}{% if recipe.ingredients.split(",")|length > 3 %}... and more!{% endif %}</p>
+                            <div class="text-muted recipe-card-text">Average Rating:
+                                {% if recipe.average_rating != "No ratings yet" %}
+                                    {{ recipe.average_rating|round(1) }}
+                                {% else %}
+                                    {{ recipe.average_rating }}
+                                {% endif %} out of 5
+                            </div>
+                            <button class="btn btn-primary view-recipe"
+                            data-name="{{ recipe.recipe_name }}"
+                            data-image="{{ url_for('static', filename=recipe.image_link) }}"
+                            data-ingredients="{{ recipe.ingredients }}"
+                            data-preparation="{{ recipe.preparation }}"
+                            data-serving="{{ recipe.serving }}">
+                            View Recipe
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
-        {% endfor %}
+            {% endfor %}
+        {% else %}
+            <p>No recipes found with this name or ingredient combination. Please try your search again!</p>
+        {% endif %}
     </div>
 </div>
 </div>

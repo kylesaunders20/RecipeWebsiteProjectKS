@@ -9,13 +9,31 @@
             <div class="card">
                 <img src="{{ url_for('static', filename=recipe.image_link) }}" class="card-img-top" alt="{{ recipe.recipe_name }}">
                 <div class="card-body">
-                    <h5 class="card-title">{{ recipe.recipe_name }}</h5>
-                    <p class="card-text">{{ recipe.ingredients.split(",")[0] }} and more...</p>
-                    <div class="text-muted">Average Rating: {{ recipe.average_rating }}</div>
+                    <h5 class="card-title recipe-card-text">{{ recipe.recipe_name }}</h5>
+                    <p class="card-text recipe-card-text">Ingredients: {{ ", ".join(recipe.ingredients.split(",")[:3]) }}{% if recipe.ingredients.split(",")|length > 3 %}...and more!{% endif %}</p>
+                    <div class="text-muted recipe-card-text">Average Rating:
+                        {% if recipe.average_rating != "No ratings yet" %}
+                            {{ recipe.average_rating|round(1) }}
+                        {% else %}
+                            {{ recipe.average_rating }}
+                        {% endif %} out of 5
+                </div>
+                    <button type="button"
+                    class="btn btn-primary view-recipe"
+                    data-name="{{ recipe.recipe_name }}"
+                    data-image="{{ url_for('static', filename=recipe.image_link) }}"
+                    data-ingredients="{{ recipe.ingredients }}"
+                    data-preparation="{{ recipe.preparation }}"
+                    data-serving="{{ recipe.serving }}">
+                    View Recipe
+                    </button>
                 </div>
             </div>
         </div>
+
         {% endfor %}
     </div>
 </div>
+<script src="{{ url_for('static', filename='js/recipeCard.js') }}"></script>
 {% endblock %}
+

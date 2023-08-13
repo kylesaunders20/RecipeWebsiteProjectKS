@@ -3,21 +3,26 @@
 {% block content %}
 <div class="container mt-5">
     <h1 class="text-center mb-4">Submit a Recipe</h1>
-    <form method="post" action="{{ url_for('submit') }}">
+    <form method="post" action="{{ url_for('submit') }}" enctype="multipart/form-data">
         <div class="mb-3">
-            <label for="recipeName" class="form-label">Recipe Name</label>
+            <label for="recipeName" class="form-label recipe-card-text">Recipe Name</label>
             <input type="text" class="form-control" id="recipeName" name="recipe_name" required>
         </div>
         <div class="mb-3">
-            <label for="ingredients" class="form-label">Ingredients (separated by commas)</label>
+            <label for="image" class="form-label recipe-card-text">Upload Recipe Image</label>
+            <input type="file" class="form-control" id="image" name="file" accept="image/*" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="ingredients" class="form-label recipe-card-text">Ingredients (separated by commas)</label>
             <textarea class="form-control" id="ingredients" name="ingredients" rows="3" required></textarea>
         </div>
         <div class="mb-3">
-            <label for="preparation" class="form-label">Preparation Instructions</label>
+            <label for="preparation" class="form-label recipe-card-text">Preparation Instructions</label>
             <textarea class="form-control" id="preparation" name="preparation" rows="4" required></textarea>
         </div>
         <div class="mb-3">
-            <label for="serving" class="form-label">Serving Instructions</label>
+            <label for="serving" class="form-label recipe-card-text">Serving Instructions</label>
             <input type="text" class="form-control" id="serving" name="serving" required>
         </div>
         <div class="text-center">

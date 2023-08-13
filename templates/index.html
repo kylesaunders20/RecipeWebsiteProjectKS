@@ -9,9 +9,11 @@
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;500&display=swap" rel="stylesheet">
 
-    <!-- Custom CSS (if you have a separate stylesheet) -->
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+
+
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
     <title>Recipe Website</title>
@@ -20,13 +22,13 @@
 
 <!-- Navigation Bar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container">
-        <a class="navbar-brand" href="#">Recipe Site</a>
+    <div class="container d-flex justify-content-between">
+        <a class="navbar-brand" href="/">TasteBook</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ml-auto">
+        <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+            <ul class="navbar-nav">
                 <li class="nav-item active">
                     <a class="nav-link" href="/">Home</a>
                 </li>
@@ -42,46 +44,102 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/search">Search Recipe</a>
                 </li>
-                <!-- Add other navigation links as needed -->
             </ul>
         </div>
     </div>
 </nav>
 
+
 <!-- Main Content -->
 {% block content %}
-    <div class="jumbotron">
-      <h1 class="display-4">Welcome to Kyle's Recipe Site!</h1>
-      <p class="lead">Discover, Share, and Enjoy the best recipes from around the world.</p>
-      <hr class="my-4">
-      <p>Find your next favorite recipe or share your own!</p>
-      <a class="btn btn-primary btn-lg" href="/gallery" role="button">Browse Recipes</a>
-    </div>
+<div class="jumbotron d-flex flex-column align-items-center justify-content-center">
+    <h1 class="display-4">Welcome to TasteBook.</h1>
+    <img src="{{ url_for('static', filename='images/book2.png') }}" alt="Open Recipe Book" class="img-fluid mb-3">
+    <h1 class="display-4">Turn the page. Taste the story.</h1>
+    <hr class="my-4">
+    <p class="tagline-text">Mouse, meet button.</p>
+    <p class="tagline-text">Food, meet plate.</p>
+    <p class="tagline-text">You're gonna love it here.</p>
+    <a class="btn btn-primary btn-lg" href="/gallery" role="button">Browse Recipes</a>
+</div>
+
 
     <!-- Featured Recipes using Bootstrap Grid and Cards -->
-    <div class="container">
-      <h2>Featured Recipes</h2>
-      <div class="row">
-        <!-- Example Recipe Card -->
+<div class="container">
+  <h2>Featured Recipes</h2>
+  <div class="row">
+    {% for recipe in featured_recipes %}
         <div class="col-md-4">
           <div class="card">
-            <img src="cake.jpg" class="card-img-top" alt="...">
+            <img src="{{ url_for('static', filename=recipe.image_link) }}" class="card-img-top" alt="{{ recipe.recipe_name }}">
             <div class="card-body">
-              <h5 class="card-title">Chocolate Cake</h5>
-              <p class="card-text">Delicious chocolate cake!</p>
-              <a href="#" class="btn btn-primary">View Recipe</a>
+              <h5 class="card-title recipe-card-text">{{ recipe.recipe_name }}</h5>
+              <p class="card-text recipe-card-text">Ingredients: {{ ", ".join(recipe.ingredients.split(",")[:3]) }}{% if recipe.ingredients.split(",")|length > 3 %}... and more!{% endif %}</p>
+              <div class="text-muted">Average Rating:
+                  {% if recipe.average_rating != "No ratings yet" %}
+                      {{ recipe.average_rating|round(1) }}
+                  {% else %}
+                      {{ recipe.average_rating }}
+                  {% endif %} out of 5
+              </div>
+              <button class="btn btn-primary view-recipe"
+              data-name="{{ recipe.recipe_name }}"
+              data-image="{{ url_for('static', filename=recipe.image_link) }}"
+              data-ingredients="{{ recipe.ingredients }}"
+              data-preparation="{{ recipe.preparation }}"
+              data-serving="{{ recipe.serving }}">
+              View Recipe
+              </button>
             </div>
           </div>
         </div>
-        <!-- Repeat for other recipes -->
-      </div>
-    </div>
+    {% endfor %}
+  </div>
+</div>
+
+
 {% endblock %}
 
-<!-- Optional: Bootstrap JS, Popper.js, and jQuery -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="{{ url_for('static', filename='js/recipeCard.js') }}"></script>
+<div class="modal fade" id="recipeModal" tabindex="-1" aria-labelledby="recipeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title recipe-card-text" id="recipeModalLabel">Recipe Name</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <img src="#" id="recipeImage" class="img-fluid mb-3" alt="Recipe Image">
+        <h5 class="recipe-card-text">Ingredients:</h5>
+        <p id="recipeIngredients"></p>
+        <h5 class="recipe-card-text">Preparation:</h5>
+        <p id="recipePreparation"></p>
+        <h5 class="recipe-card-text">Serving:</h5>
+        <p id="recipeServing"></p>
+        <h5 class="recipe-card-text">Rate this Recipe:</h5>
+        <form id="ratingForm">
+            {% for i in range(5, 0, -1) %}
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="rating" id="rating{{i}}" value="{{i}}">
+                <label class="form-check-label" for="rating{{i}}">{{i}}</label>
+            </div>
+            {% endfor %}
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="submitRating">Submit Rating</button>
+      </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
