@@ -13,6 +13,7 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+# Displays the Home page with the navigation bar, jumbotron and featured recipes
 @app.route('/')
 def index():
     # Fetch all recipes
@@ -27,7 +28,7 @@ def index():
     return render_template('index.html', featured_recipes=featured_recipes)
 
 
-
+# Displays the Recipe Gallery page with all recipes
 @app.route('/gallery')
 def gallery():
     recipes = fetch_recipes()
@@ -37,7 +38,7 @@ def gallery():
     return render_template('gallery.html', recipes=recipes)
 
 
-
+# Displays the Recipe Submission page and form
 @app.route('/submit', methods=['GET', 'POST'])
 def submit():
     if request.method == 'POST':
@@ -59,14 +60,14 @@ def submit():
 
 
 
-
+# Displays the Recipe Management page where recipes can be deleted from the site
 @app.route('/manage')
 def manage():
     recipes = fetch_recipes()
     return render_template('manage.html', recipes=recipes)
 
 
-
+# Displays the Search Recipe page and handles its functionality and form
 @app.route('/search', methods=['GET'])
 def search():
     search_term = request.args.get('search_term', '')
@@ -79,7 +80,7 @@ def search():
 
     return render_template('search.html', recipes=recipes, search_term=search_term, ingredient_filter=ingredient_filter)
 
-
+# Handles the AJAX request for rating a recipe
 @app.route('/rate_recipe', methods=['POST'])
 def rate_recipe():
     recipe_name = request.form.get("recipe_name")
@@ -92,7 +93,7 @@ def rate_recipe():
     return jsonify(success=False, message="Failed to rate the recipe.")
 
 
-
+# Handles deletion of a specified recipe
 @app.route('/delete_recipe/<recipe_name>', methods=['POST'])
 def delete_recipe(recipe_name):
     recipes = fetch_recipes()
@@ -118,19 +119,14 @@ def delete_recipe(recipe_name):
 
     return redirect(url_for('manage'))
 
-@app.route('/recipe/<recipe_name>')
-def recipe_detail(recipe_name):
-    recipes = fetch_recipes()
-    for recipe in recipes:
-        if recipe["recipe_name"] == recipe_name:
-            return render_template('recipe_detail.html', recipe=recipe)
-    return "Recipe not found", 404
 
 
-
+# Checks if the uploaded file has an allowed extension
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+
+# Fetches all recipes from the CSV file
 def fetch_recipes():
     recipes = []
     with open(os.path.join("csvfiles", "recipes.csv"), "r") as file:
@@ -139,12 +135,15 @@ def fetch_recipes():
             recipes.append(row)
     return recipes
 
+
+# Saves a new recipe to the CSV file
 def save_recipe(recipe_data):
     with open(os.path.join("csvfiles", "recipes.csv"), "a", newline='') as file:
         writer = csv.DictWriter(file, fieldnames=["recipe_name", "image_link", "ingredients", "preparation", "serving", "user_ratings"])
         writer.writerow(recipe_data)
 
 
+# Searches for a recipe based on the name or ingredients
 def search_recipes(search_term=None, ingredient_filter=None):
     recipes = fetch_recipes()
     filtered_recipes = []
@@ -159,7 +158,7 @@ def search_recipes(search_term=None, ingredient_filter=None):
     return filtered_recipes
 
 
-
+# Retrieves the ratings for a chosen recipe
 def get_ratings(recipe_name):
     recipes = fetch_recipes()
     for recipe in recipes:
@@ -168,6 +167,7 @@ def get_ratings(recipe_name):
     return []
 
 
+# Updates the ratings for a chosen recipe
 def update_ratings(recipe_name, new_rating):
     recipes = fetch_recipes()
     updated = False
